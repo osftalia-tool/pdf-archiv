@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statisches Dokumenten-Archiv</title>
     <style>
+        /* CSS Variablen für einfachen Wechsel zwischen Light und Dark Mode */
         :root {
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
@@ -15,30 +16,73 @@
             --border-color: #e1e4e8;
         }
 
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent-color: #3399ff;
+            --accent-hover: #66b2ff;
+            --border-color: #333333;
+        }
+
         body { 
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             max-width: 700px; 
-            margin: 50px auto; 
-            padding: 20px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
             line-height: 1.6; 
             background-color: var(--bg-color);
             color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Top Bar mit Theme Switcher */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
         }
 
         .header-section {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 { 
             font-size: 2.2rem;
-            color: var(--text-main);
             margin-bottom: 10px;
         }
 
         .subtitle {
             color: var(--text-muted);
             font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        /* Statistik Badge */
+        .stats-badge {
+            display: inline-block;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: bold;
         }
 
         /* Suchleiste Styles */
@@ -53,15 +97,16 @@
             border: 2px solid var(--border-color);
             border-radius: 8px;
             background-color: var(--card-bg);
+            color: var(--text-main);
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
             box-sizing: border-box;
         }
 
         .search-input:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
         }
 
         /* Dokumenten-Liste (Kacheln) */
@@ -81,7 +126,7 @@
 
         .doc-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
         }
 
         .doc-link { 
@@ -137,9 +182,14 @@
 </head>
 <body>
 
+    <div class="top-bar">
+        <button class="theme-toggle" id="themeToggle">🌓 Modus wechseln</button>
+    </div>
+
     <div class="header-section">
         <h1>Digitales Dokumenten-Archiv</h1>
         <p class="subtitle">Zentrale Bereitstellung statischer Lehr- und Arbeitsdateien.</p>
+        <span class="stats-badge" id="statsCounter">0 Dokumente</span>
     </div>
 
     <div class="search-container">
@@ -201,7 +251,22 @@
         const docList = document.getElementById('docList');
         const docItems = docList.getElementsByClassName('doc-item');
         const noResults = document.getElementById('noResults');
+        const statsCounter = document.getElementById('statsCounter');
+        const themeToggle = document.getElementById('themeToggle');
 
+        // Funktion zum Aktualisieren des Zählers
+        function updateCounter() {
+            let visibleCount = 0;
+            Array.from(docItems).forEach(item => {
+                if (item.style.display !== 'none') visibleCount++;
+            });
+            statsCounter.textContent = `${visibleCount} von ${docItems.length} Dokumenten`;
+        }
+
+        // Initiale Zählung beim Laden der Seite
+        updateCounter();
+
+        // Echtzeit-Suche Logik
         searchBar.addEventListener('keyup', function(e) {
             const term = e.target.value.toLowerCase();
             let hasResults = false;
@@ -216,12 +281,24 @@
                 }
             });
 
-            if(hasResults) {
-                noResults.style.display = 'none';
+            noResults.style.display = hasResults ? 'none' : 'block';
+            updateCounter();
+        });
+
+        // Dark Mode Umschalter Logik
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'light');
             } else {
-                noResults.style.display = 'block';
+                document.documentElement.setAttribute('data-theme', 'dark');
             }
         });
+
+        // Automatische Erkennung der System-Einstellung des Nutzers (Default)
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
     </script>
 
 </body>
