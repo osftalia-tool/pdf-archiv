@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statisches Dokumenten-Archiv</title>
     <style>
-        /* CSS Variablen für einfachen Wechsel zwischen Light und Dark Mode */
+        /* CSS Variablen für Light und Dark Mode */
         :root {
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
@@ -14,6 +14,8 @@
             --accent-color: #0066cc;
             --accent-hover: #004499;
             --border-color: #e1e4e8;
+            --folder-bg: #e9ecef;
+            --folder-text: #495057;
         }
 
         [data-theme="dark"] {
@@ -24,6 +26,8 @@
             --accent-color: #3399ff;
             --accent-hover: #66b2ff;
             --border-color: #333333;
+            --folder-bg: #2a2a2a;
+            --folder-text: #e0e0e0;
         }
 
         body { 
@@ -37,7 +41,6 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Top Bar mit Theme Switcher */
         .top-bar {
             display: flex;
             justify-content: flex-end;
@@ -73,7 +76,6 @@
             margin-bottom: 15px;
         }
 
-        /* Statistik Badge */
         .stats-badge {
             display: inline-block;
             background: var(--card-bg);
@@ -85,7 +87,6 @@
             font-weight: bold;
         }
 
-        /* Suchleiste Styles */
         .search-container {
             margin-bottom: 30px;
         }
@@ -103,13 +104,48 @@
             box-sizing: border-box;
         }
 
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+        /* Ordner / Akkordeon Styles */
+        .folder-container {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        /* Dokumenten-Liste (Kacheln) */
+        .folder-header {
+            background-color: var(--folder-bg);
+            color: var(--folder-text);
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .folder-icon::after {
+            content: '📁 ▼';
+            font-size: 0.9rem;
+        }
+
+        .folder-container.open .folder-icon::after {
+            content: '📂 ▲';
+        }
+
+        .folder-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 10px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .folder-container.open .folder-content {
+            display: block;
+        }
+
+        /* Dokumenten-Liste */
         .doc-list { 
             list-style: none;
             padding: 0;
@@ -117,26 +153,25 @@
         }
 
         .doc-item {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 12px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .doc-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        .doc-item:last-child {
+            border-bottom: none;
         }
 
         .doc-link { 
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 20px;
+            padding: 14px 0;
             color: var(--text-main);
             text-decoration: none; 
             font-weight: 600;
+        }
+
+        .doc-item:hover .doc-name {
+            color: var(--accent-color);
         }
 
         .doc-info {
@@ -145,7 +180,6 @@
             gap: 15px;
         }
 
-        /* Rotes PDF-Icon Simulation */
         .pdf-icon {
             background-color: #ff4d4d;
             color: white;
@@ -159,9 +193,9 @@
         .btn-download {
             background-color: var(--accent-color);
             color: white;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
             transition: background-color 0.2s;
         }
@@ -170,7 +204,6 @@
             background-color: var(--accent-hover);
         }
 
-        /* Info falls nichts gefunden wird */
         .no-results {
             display: none;
             text-align: center;
@@ -196,63 +229,89 @@
         <input type="text" id="searchBar" class="search-input" placeholder="Dokumente durchsuchen...">
     </div>
     
-    <ul class="doc-list" id="docList">
-        <li class="doc-item">
-            <a class="doc-link" href="dateien/java_gui.pdf" target="_blank">
-                <div class="doc-info">
-                    <span class="pdf-icon">PDF</span>
-                    <span class="doc-name">Java GUI Einführung</span>
-                </div>
-                <span class="btn-download">Öffnen</span>
-            </a>
-        </li>
-        <li class="doc-item">
-            <a class="doc-link" href="dateien/java_layout_a.pdf" target="_blank">
-                <div class="doc-info">
-                    <span class="pdf-icon">PDF</span>
-                    <span class="doc-name">Java Layout Teil A</span>
-                </div>
-                <span class="btn-download">Öffnen</span>
-            </a>
-        </li>
-        <li class="doc-item">
-            <a class="doc-link" href="dateien/java_layout_b.pdf" target="_blank">
-                <div class="doc-info">
-                    <span class="pdf-icon">PDF</span>
-                    <span class="doc-name">Java Layout Teil B</span>
-                </div>
-                <span class="btn-download">Öffnen</span>
-            </a>
-        </li>
-        <li class="doc-item">
-            <a class="doc-link" href="dateien/python_a.pdf" target="_blank">
-                <div class="doc-info">
-                    <span class="pdf-icon">PDF</span>
-                    <span class="doc-name">Python Grundlagen Teil A</span>
-                </div>
-                <span class="btn-download">Öffnen</span>
-            </a>
-        </li>
-        <li class="doc-item">
-            <a class="doc-link" href="dateien/python_b.pdf" target="_blank">
-                <div class="doc-info">
-                    <span class="pdf-icon">PDF</span>
-                    <span class="doc-name">Python Grundlagen Teil B</span>
-                </div>
-                <span class="btn-download">Öffnen</span>
-            </a>
-        </li>
-    </ul>
+    <div id="mainContent">
+        <div class="folder-container open">
+            <div class="folder-header" onclick="toggleFolder(this)">
+                <span>Java Programmierung</span>
+                <span class="folder-icon"></span>
+            </div>
+            <div class="folder-content">
+                <ul class="doc-list">
+                    <li class="doc-item">
+                        <a class="doc-link" href="dateien/java_gui.pdf" target="_blank">
+                            <div class="doc-info">
+                                <span class="pdf-icon">PDF</span>
+                                <span class="doc-name">Java GUI Einführung</span>
+                            </div>
+                            <span class="btn-download">Öffnen</span>
+                        </a>
+                    </li>
+                    <li class="doc-item">
+                        <a class="doc-link" href="dateien/java_layout_a.pdf" target="_blank">
+                            <div class="doc-info">
+                                <span class="pdf-icon">PDF</span>
+                                <span class="doc-name">Java Layout Teil A</span>
+                            </div>
+                            <span class="btn-download">Öffnen</span>
+                        </a>
+                    </li>
+                    <li class="doc-item">
+                        <a class="doc-link" href="dateien/java_layout_b.pdf" target="_blank">
+                            <div class="doc-info">
+                                <span class="pdf-icon">PDF</span>
+                                <span class="doc-name">Java Layout Teil B</span>
+                            </div>
+                            <span class="btn-download">Öffnen</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="folder-container open">
+            <div class="folder-header" onclick="toggleFolder(this)">
+                <span>Python Programmierung</span>
+                <span class="folder-icon"></span>
+            </div>
+            <div class="folder-content">
+                <ul class="doc-list">
+                    <li class="doc-item">
+                        <a class="doc-link" href="dateien/python_a.pdf" target="_blank">
+                            <div class="doc-info">
+                                <span class="pdf-icon">PDF</span>
+                                <span class="doc-name">Python Grundlagen Teil A</span>
+                            </div>
+                            <span class="btn-download">Öffnen</span>
+                        </a>
+                    </li>
+                    <li class="doc-item">
+                        <a class="doc-link" href="dateien/python_b.pdf" target="_blank">
+                            <div class="doc-info">
+                                <span class="pdf-icon">PDF</span>
+                                <span class="doc-name">Python Grundlagen Teil B</span>
+                            </div>
+                            <span class="btn-download">Öffnen</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <div id="noResults" class="no-results">Keine passenden Dokumente gefunden.</div>
 
     <script>
         const searchBar = document.getElementById('searchBar');
-        const docList = document.getElementById('docList');
-        const docItems = docList.getElementsByClassName('doc-item');
+        const docItems = document.getElementsByClassName('doc-item');
         const noResults = document.getElementById('noResults');
         const statsCounter = document.getElementById('statsCounter');
         const themeToggle = document.getElementById('themeToggle');
+        const folders = document.getElementsByClassName('folder-container');
+
+        // Funktion zum Auf- und Zuklappen der Ordner
+        function toggleFolder(header) {
+            header.parentElement.classList.toggle('open');
+        }
 
         // Funktion zum Aktualisieren des Zählers
         function updateCounter() {
@@ -260,42 +319,52 @@
             Array.from(docItems).forEach(item => {
                 if (item.style.display !== 'none') visibleCount++;
             });
-            statsCounter.textContent = `${visibleCount} von ${docItems.length} Dokumenten`;
+            statsCounter.textContent = `${visibleCount} Dokumente verfügbar`;
         }
 
-        // Initiale Zählung beim Laden der Seite
         updateCounter();
 
-        // Echtzeit-Suche Logik
+        // Intelligente Echtzeit-Suche
         searchBar.addEventListener('keyup', function(e) {
             const term = e.target.value.toLowerCase();
-            let hasResults = false;
+            let hasGlobalResults = false;
 
-            Array.from(docItems).forEach(function(item) {
-                const docName = item.querySelector('.doc-name').textContent.toLowerCase();
-                if(docName.indexOf(term) != -1) {
-                    item.style.display = 'block';
-                    hasResults = true;
+            Array.from(folders).forEach(function(folder) {
+                const itemsInFolder = folder.getElementsByClassName('doc-item');
+                let hasFolderResults = false;
+
+                Array.from(itemsInFolder).forEach(function(item) {
+                    const docName = item.querySelector('.doc-name').textContent.toLowerCase();
+                    if(docName.indexOf(term) != -1) {
+                        item.style.display = 'block';
+                        hasFolderResults = true;
+                        hasGlobalResults = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Wenn in einem Ordner etwas gefunden wird, klappt er automatisch auf
+                if (hasFolderResults) {
+                    folder.style.display = 'block';
+                    if (term.length > 0) {
+                        folder.classList.add('open');
+                    }
                 } else {
-                    item.style.display = 'none';
+                    folder.style.display = 'none';
                 }
             });
 
-            noResults.style.display = hasResults ? 'none' : 'block';
+            noResults.style.display = hasGlobalResults ? 'none' : 'block';
             updateCounter();
         });
 
         // Dark Mode Umschalter Logik
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
+            document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
         });
 
-        // Automatische Erkennung der System-Einstellung des Nutzers (Default)
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
